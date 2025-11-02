@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employee Member Management</title>
+  <style>
+    /* === DARK THEME STYLES === */
+    :root {
+      --bg: #0b0c10;
+      --card: #1f2833;
+      --text: #c5c6c7;
+      --accent: #66fcf1;
+      --muted: #777;
+      --danger: #ff4c4c;
+      --radius: 10px;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      width: 95%;
+      max-width: 1000px;
+      background: var(--card);
+      margin: 40px auto;
+      padding: 25px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+    h1 {
+      margin: 0;
+      color: var(--accent);
+      font-size: 1.8rem;
+    }
+    .btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+    }
+    .btn.ghost:hover { background: var(--accent); color: #000; }
+    .btn.danger {
+      background: var(--danger);
+      color: #fff;
+      border: none;
+    }
+    .btn.small { padding: 5px 10px; font-size: 0.85rem; }
+    .table-wrap { overflow-x: auto; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid #333;
+    }
+    th {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    tr:hover { background: rgba(255,255,255,0.05); }
+    td { color: var(--text); }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    input, select {
+      padding: 10px;
+      border-radius: var(--radius);
+      border: 1px solid #333;
+      background: #121417;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    input:focus, select:focus {
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    @media (max-width: 600px) {
+      th, td { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <h1>Employee Members</h1>
+    </div>
+
+    <!-- Add/Edit Employee Form -->
+    <form id="empForm">
+      <input type="hidden" id="empIndex" />
+      <input type="text" id="name" placeholder="Full Name" required>
+      <input type="text" id="phone" placeholder="Phone Number" required>
+      <input type="text" id="department" placeholder="Department" required>
+      <input type="text" id="position" placeholder="Position" required>
+      <select id="category" required>
+        <option value="">Select Category</option>
+        <option value="Tech">Tech</option>
+        <option value="Non-Tech">Non-Tech</option>
+      </select>
+      <button class="btn" type="submit">Add Employee</button>
+    </form>
+
+    <!-- Employee Table -->
+    <div class="table-wrap">
+      <table id="empTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Department</th>
+            <th>Position</th>
+            <th>Category</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Go Back Button
+    function goBack(){
+      if(localStorage.getItem('adminLogged') === 'true'){
+        window.location.href = 'admin-portal.html';
+      } else {
+        window.location.href = 'employee.html';
+      }
+    }
+
+    // Load Employees
+    function getEmployees(){
+      return JSON.parse(localStorage.getItem('employeeList') || '[]');
+    }
+
+    function saveEmployees(list){
+      localStorage.setItem('employeeList', JSON.stringify(list));
+    }
+
+    // Render Employee Table
+    function renderTable(){
+      const employees = getEmployees();
+      const tbody = document.querySelector('#empTable tbody');
+      tbody.innerHTML = '';
+      if(employees.length === 0){
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:gray">No employees found</td></tr>';
+        return;
+      }
+
+      employees.forEach((e, i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i+1}</td>
+          <td>${e.name}</td>
+          <td>${e.phone}</td>
+          <td>${e.department}</td>
+          <td>${e.position}</td>
+          <td>${e.category}</td>
+          <td>
+            <button class="btn small" onclick="editEmployee(${i})">Edit</button>
+            <button class="btn small danger" onclick="deleteEmployee(${i})">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Add/Edit Employee
+    document.getElementById('empForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const department = document.getElementById('department').value.trim();
+      const position = document.getElementById('position').value.trim();
+      const category = document.getElementById('category').value;
+      const index = document.getElementById('empIndex').value;
+
+      if(!name || !phone || !department || !position || !category) return alert("All fields required!");
+
+      let employees = getEmployees();
+
+      const newEmp = { name, phone, department, position, category };
+
+      if(index === ''){
+        employees.push(newEmp);
+      } else {
+        employees[index] = newEmp;
+        document.getElementById('empForm').querySelector('button[type="submit"]').innerText = "Add Employee";
+      }
+
+      saveEmployees(employees);
+      renderTable();
+      this.reset();
+      document.getElementById('empIndex').value = '';
+    });
+
+    // Edit
+    function editEmployee(i){
+      const emp = getEmployees()[i];
+      document.getElementById('name').value = emp.name;
+      document.getElementById('phone').value = emp.phone;
+      document.getElementById('department').value = emp.department;
+      document.getElementById('position').value = emp.position;
+      document.getElementById('category').value = emp.category;
+      document.getElementById('empIndex').value = i;
+      document.getElementById('empForm').querySelector('button[type="submit"]').innerText = "Update Employee";
+    }
+
+    // Delete
+    function deleteEmployee(i){
+      if(!confirm("Are you sure you want to delete this employee?")) return;
+      let employees = getEmployees();
+      employees.splice(i, 1);
+      saveEmployees(employees);
+      renderTable();
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>

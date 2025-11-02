@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Employee — Mark Attendance</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container" style="max-width:480px">
+    <h1>Mark Attendance</h1>
+
+    <!-- Step 1: mark -->
+    <div id="stepMark">
+      <div class="form-row">
+        <div class="form-col">
+          <label for="empName">Employee Name</label>
+          <input id="empName" type="text" placeholder="Full name"/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-col">
+          <label for="empStatus">Status</label>
+          <select id="empStatus">
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+            <option value="On Leave">On Leave</option>
+            <option value="WFH">WFH</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button class="btn" onclick="startConfirm()">Mark Attendance</button>
+        <button class="btn ghost" onclick="location.href='index.html'">Back</button>
+      </div>
+    </div>
+
+    <!-- Step 2: login verification -->
+    <div id="stepLogin" style="display:none;margin-top:16px">
+      <h3>Confirm (Employee Login)</h3>
+      <div class="form-row">
+        <div class="form-col">
+          <label for="empPhone">Phone Number</label>
+          <input id="empPhone" type="text" placeholder="e.g. 9876543210"/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-col">
+          <label for="empPass">Password</label>
+          <input id="empPass" type="password" placeholder="Enter password"/>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button class="btn" onclick="confirmAndSave()">Login & Confirm</button>
+        <button class="btn ghost" onclick="cancelConfirm()">Cancel</button>
+      </div>
+      <p id="msg" style="margin-top:10px"></p>
+    </div>
+
+    <p style="color:var(--muted);margin-top:14px">Note: After marking, login is required to confirm your attendance.</p>
+  </div>
+
+  <script>
+    // Demo employee credentials mapping (simple). In real system, replace with real account check / backend.
+    // Format: phone -> password
+    const demoEmployees = {
+      "9876543210": "1234",
+      "9998887776": "abcd"
+    };
+
+    let pendingRecord = null;
+
+    function startConfirm(){
+      const name = document.getElementById('empName').value.trim();
+      const status = document.getElementById('empStatus').value;
+      const msg = document.getElementById('msg');
+      msg.textContent = '';
+
+      if(!name){
+        alert('Please enter your name.');
+        return;
+      }
+
+      // Save pending record (not written to storage yet)
+      pendingRecord = {
+        name,
+        status,
+        createdAtISO: new Date().toISOString()
+      };
+
+      document.getElementById('stepMark').style.display = 'none';
+      document.getElementById('stepLogin').style.display = 'block';
+      msg.style.color = 'var(--muted)';
+      msg.innerText = 'Enter phone and password to confirm.';
+    }
+
+    function cancelConfirm(){
+      pendingRecord = null;
+      document.getElementById('stepLogin').style.display = 'none';
+      document.getElementById('stepMark').style.display = 'block';
+      document.getElementById('msg').textContent = '';
+    }
+
+    function confirmAndSave(){
+      const phone = document.getElementById('empPhone').value.trim();
+      const pass = document.getElementById('empPass').value;
+      const msg = document.getElementById('msg');
+
+      if(!phone || !pass){
+        msg.style.color = 'red';
+        msg.innerText = 'Phone and password are required.';
+        return;
+      }
+
+      // Check demo credential
+      if(demoEmployees[phone] && demoEmployees[phone] === pass){
+        // store record to localStorage with ISO timestamp for reliable filtering
+        const rec = {
+          name: pendingRecord.name,
+          status: pendingRecord.status,
+          timestamp: pendingRecord.createdAtISO,
+          phone // for audit (optional)
+        };
+
+        const arr = JSON.parse(localStorage.getItem('attendanceData') || '[]');
+        arr.push(rec);
+        localStorage.setItem('attendanceData', JSON.stringify(arr));
+
+        msg.style.color = 'var(--accent)';
+        const dt = new Date(rec.timestamp).toLocaleString();
+        msg.innerText = `✅ Confirmed. ${rec.name} — ${rec.status} at ${dt}`;
+
+        // reset UI after short delay
+        setTimeout(()=> {
+          pendingRecord = null;
+          document.getElementById('empName').value = '';
+          document.getElementById('empPhone').value = '';
+          document.getElementById('empPass').value = '';
+          document.getElementById('stepLogin').style.display = 'none';
+          document.getElementById('stepMark').style.display = 'block';
+        },1600);
+      } else {
+        msg.style.color = 'red';
+        msg.innerText = 'Invalid phone or password.';
+      }
+    }
+  </script>
+</body>
+</html>

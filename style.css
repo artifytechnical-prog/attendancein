@@ -1,0 +1,77 @@
+/* style.css - shared dark theme */
+:root{
+  --accent:#00ffc8;
+  --accent-dark:#0075ff;
+  --bg:#0d1117;
+  --card: rgba(255,255,255,0.04);
+  --muted:#9aa5b1;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(180deg,#091017 0%, #0d1117 100%);
+  color:#e6eef3;
+  -webkit-font-smoothing:antialiased;
+}
+
+.container{
+  width:95%;
+  max-width:980px;
+  margin:48px auto;
+  background:var(--card);
+  border:1px solid rgba(0,0,0,0.25);
+  padding:22px;
+  border-radius:12px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.6);
+}
+
+/* buttons / inputs */
+.btn{
+  background:linear-gradient(90deg,var(--accent),var(--accent-dark));
+  color:#001;
+  border:none;
+  padding:10px 14px;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+}
+.btn.ghost{
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.08);
+  color:var(--accent);
+}
+.small{padding:6px 10px; font-size:0.9rem}
+
+/* forms */
+.form-row{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.form-col{flex:1;display:flex;flex-direction:column}
+label{font-size:0.85rem;color:var(--muted);margin-bottom:6px}
+input[type="text"], input[type="password"], input[type="date"], select{
+  padding:10px;border-radius:8px;border:none;background:rgba(255,255,255,0.02);color:inherit;outline:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+/* headings */
+h1,h2{margin:0 0 12px 0;color:var(--accent)}
+h3{margin:0 0 10px 0;color:#dfeff0}
+
+/* tables */
+.table-wrap{overflow:auto;background:transparent;border-radius:8px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.03)}
+th{background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));color:#001;padding:12px;border-radius:6px}
+tr:hover td{background:rgba(0,255,200,0.03)}
+
+/* small controls row */
+.controls{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap}
+.controls .left, .controls .right{display:flex;gap:8px;align-items:center}
+
+/* responsive */
+@media(max-width:720px){
+  .form-row{flex-direction:column}
+  .controls{flex-direction:column;align-items:stretch}
+}
+.footer-note{font-size:0.85rem;color:var(--muted);margin-top:14px;text-align:center}

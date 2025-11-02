@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin Login — Attendance</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container" style="max-width:420px">
+    <h1>Admin Login</h1>
+    <form id="form">
+      <label>Username</label>
+      <input id="username" type="text" placeholder="admin" />
+      <label>Password</label>
+      <input id="password" type="password" placeholder="••••••" />
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn" type="submit">Login</button>
+       
+      </div>
+    </form>
+    <p id="msg" style="margin-top:12px"></p>
+  </div>
+
+  <script>
+    // Change admin credentials if needed
+    const adminCred = { user: 'artify@2005', pass: 'artify2005' };
+
+    document.getElementById('form').addEventListener('submit', function(e){
+      e.preventDefault();
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value.trim();
+      const msg = document.getElementById('msg');
+
+      if(u === adminCred.user && p === adminCred.pass){
+        localStorage.setItem('adminLogged','true');
+        window.location.href = 'C:\Users\DELL\Desktop\ARTIFY  Attendance\attendance-system\admin-portal.html';
+      } else {
+        msg.style.color = 'red';
+        msg.innerText = 'Invalid admin credentials';
+      }
+    });
+  </script>
+</body>
+</html>
